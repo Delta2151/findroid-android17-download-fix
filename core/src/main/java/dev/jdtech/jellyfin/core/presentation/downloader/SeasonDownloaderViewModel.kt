@@ -53,18 +53,26 @@ constructor(
         observation?.cancel()
         observation = viewModelScope.launch {
             workManager.getWorkInfosForUniqueWorkFlow(name).collect { infos ->
-                val info = infos.firstOrNull { !it.state.isFinished } ?: infos.lastOrNull()
+                val ordered = infos.sortedBy { SeasonDownloadWorker.stepNumber(it.tags) }
+                val active = ordered.firstOrNull { !it.state.isFinished }
+                val latest = ordered.lastOrNull()
+                val latestOutput = ordered.lastOrNull { it.state.isFinished }?.outputData
+                val data =
+                    if (active != null && active.progress.keyValueMap.isNotEmpty()) active.progress
+                    else latestOutput ?: androidx.work.Data.EMPTY
+                val error =
+                    latest?.state == WorkInfo.State.FAILED ||
+                        latest?.state == WorkInfo.State.CANCELLED
                 _state.value =
-                    if (info == null) SeasonDownloadState()
-                    else
-                        SeasonDownloadState(
-                            isQueuing = !info.state.isFinished,
-                            finished = info.state.isFinished,
-                            error = info.state == WorkInfo.State.FAILED,
-                            progress =
-                                (if (info.state.isFinished) info.outputData else info.progress)
-                                    .toSeasonDownloadProgress(),
-                        )
+                    SeasonDownloadState(
+                        isQueuing = active != null,
+                        finished =
+                            active == null &&
+                                (error ||
+                                    data.getBoolean(SeasonDownloadWorker.KEY_COMPLETE, false)),
+                        error = error,
+                        progress = data.toSeasonDownloadProgress(),
+                    )
             }
         }
     }
@@ -90,6 +98,7 @@ constructor(
                         .setConstraints(
                             Constraints.Builder().setRequiredNetworkType(networkType).build()
                         )
+                        .addTag(SeasonDownloadWorker.stepTag(0))
                         .setInputData(
                             workDataOf(
                                 SeasonDownloadWorker.KEY_SEASON_ID to seasonId.toString(),

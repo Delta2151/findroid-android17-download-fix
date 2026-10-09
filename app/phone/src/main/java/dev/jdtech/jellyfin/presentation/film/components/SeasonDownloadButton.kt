@@ -72,7 +72,9 @@ fun SeasonDownloadButton(
     }
 
     LaunchedEffect(seasonId) { viewModel.observeSeason(seasonId) }
-    LaunchedEffect(state.finished) { if (state.finished) onQueued() }
+    LaunchedEffect(state.finished, state.progress.queued) {
+        if (state.finished || state.progress.queued > 0) onQueued()
+    }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         FilledTonalButton(

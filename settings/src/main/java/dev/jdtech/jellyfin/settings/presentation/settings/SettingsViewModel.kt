@@ -667,6 +667,18 @@ class SettingsViewModel @Inject constructor(private val appPreferences: AppPrefe
                                     PreferenceGroup(
                                         preferences =
                                             listOf(
+                                                PreferenceSelect(
+                                                    nameStringResource =
+                                                        R.string.season_download_batch_size,
+                                                    descriptionStringRes =
+                                                        R.string.season_download_batch_size_summary,
+                                                    supportedDeviceTypes = listOf(DeviceType.PHONE),
+                                                    backendPreference =
+                                                        appPreferences.seasonDownloadBatchSize,
+                                                    options = R.array.season_download_batch_sizes,
+                                                    optionValues =
+                                                        R.array.season_download_batch_sizes,
+                                                ),
                                                 PreferenceSwitch(
                                                     nameStringResource =
                                                         R.string.download_mobile_data,
