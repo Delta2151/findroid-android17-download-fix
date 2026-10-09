@@ -114,9 +114,7 @@ class SeasonDownloadQueueTest {
                 items.map { it.id },
                 0,
                 downloader,
-                { id ->
-                    items.first { it.id == id }
-                },
+                { id -> items.first { it.id == id } },
             )
         assertEquals(SeasonDownloadProgress(total = 3, skipped = 2, failed = 1), progress)
         assertTrue(downloader.calls.isEmpty())
@@ -131,9 +129,7 @@ class SeasonDownloadQueueTest {
                 items.map { it.id },
                 0,
                 downloader,
-                {
-                    throw CancellationException("Stopped")
-                },
+                { throw CancellationException("Stopped") },
             )
             fail("Cancellation must propagate")
         } catch (_: CancellationException) {
