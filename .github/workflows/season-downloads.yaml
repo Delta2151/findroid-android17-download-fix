@@ -21,7 +21,11 @@ jobs:
           distribution: temurin
       - uses: gradle/actions/setup-gradle@v6
       - name: Check formatting, queue behavior and phone compilation
-        run: ./gradlew ktfmtCheck :core:testLibreDebugUnitTest :app:phone:compileLibreDebugKotlin
+        run: |
+          ./gradlew :core:ktfmtFormatTest
+          git diff
+          ./gradlew ktfmtCheck :core:testLibreDebugUnitTest :app:phone:compileLibreDebugKotlin
+          git diff --exit-code
       - name: Save test reports
         if: always()
         uses: actions/upload-artifact@v7
