@@ -54,6 +54,17 @@ constructor(
                     check(repository.getUserId() == userId)
                 }
                 checkSession()
+                val name = uniqueWorkName(serverId, userId, seasonId)
+                val step = inputData.getInt(KEY_STEP, 0) + 1
+                val tag = stepTag(step)
+                // A process may stop after saving the continuation but before completing this step.
+                // The continuation already owns the checkpoint; do not enqueue again or overwrite
+                // it.
+                if (
+                    workManager.getWorkInfosForUniqueWorkFlow(name).first().any { tag in it.tags }
+                ) {
+                    return@withContext Result.success()
+                }
                 val savedIds = inputData.getByteArray(KEY_REMAINING_IDS)
                 val ids =
                     if (savedIds != null) decodeEpisodeIds(savedIds)
@@ -105,9 +116,6 @@ constructor(
                     )
                 checkSession()
                 if (!batch.complete) {
-                    val name = uniqueWorkName(serverId, userId, seasonId)
-                    val step = inputData.getInt(KEY_STEP, 0) + 1
-                    val tag = stepTag(step)
                     // A restarted step must not append its continuation twice.
                     if (
                         workManager.getWorkInfosForUniqueWorkFlow(name).first().none {
