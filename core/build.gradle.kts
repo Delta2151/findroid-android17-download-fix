@@ -27,6 +27,7 @@ android {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation(projects.data)
     implementation(projects.player.core)
     implementation(projects.settings)

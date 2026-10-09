@@ -43,6 +43,7 @@ import java.io.File
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.Exception
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.ceil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -163,6 +164,8 @@ class DownloaderImpl(
 
             startImagesDownloader(item)
             return@coroutineScope Pair(downloadId, null)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             try {
                 // Prefer the local source, it knows which workers and files have to be cleaned up

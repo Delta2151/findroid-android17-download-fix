@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
@@ -46,8 +47,10 @@ import dev.jdtech.jellyfin.presentation.film.components.ItemButtonsBar
 import dev.jdtech.jellyfin.presentation.film.components.ItemHeader
 import dev.jdtech.jellyfin.presentation.film.components.ItemPoster
 import dev.jdtech.jellyfin.presentation.film.components.ItemTopBar
+import dev.jdtech.jellyfin.presentation.film.components.SeasonDownloadButton
 import dev.jdtech.jellyfin.presentation.theme.FindroidTheme
 import dev.jdtech.jellyfin.presentation.theme.spacings
+import dev.jdtech.jellyfin.presentation.utils.LocalOfflineMode
 import dev.jdtech.jellyfin.presentation.utils.rememberSafePadding
 import java.util.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -84,12 +87,18 @@ fun SeasonScreen(
             }
             viewModel.onAction(action)
         },
+        onSeasonQueued = { viewModel.loadSeason(seasonId) },
     )
 }
 
 @Composable
-private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> Unit) {
+private fun SeasonScreenLayout(
+    state: SeasonState,
+    onAction: (SeasonAction) -> Unit,
+    onSeasonQueued: () -> Unit = {},
+) {
     val safePadding = rememberSafePadding()
+    val isOfflineMode = LocalOfflineMode.current
 
     val paddingStart = safePadding.start + MaterialTheme.spacings.default
     val paddingEnd = safePadding.end + MaterialTheme.spacings.default
@@ -166,6 +175,14 @@ private fun SeasonScreenLayout(state: SeasonState, onAction: (SeasonAction) -> U
                             Modifier.padding(start = paddingStart, end = paddingEnd).fillMaxWidth(),
                         canPlay = state.episodes.isNotEmpty(),
                     )
+                    if (!isOfflineMode && !LocalInspectionMode.current) {
+                        SeasonDownloadButton(
+                            seasonId = season.id,
+                            enabled = state.episodes.isNotEmpty(),
+                            onQueued = onSeasonQueued,
+                            modifier = Modifier.padding(start = paddingStart, end = paddingEnd),
+                        )
+                    }
                 }
                 items(items = state.episodes, key = { episode -> episode.id }) { episode ->
                     EpisodeCard(
