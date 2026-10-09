@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="season_download_batch_size">Season download batch size</string>
+    <string name="season_download_batch_size_summary">Episodes per batch (default: 2). The next batch waits until the current batch finishes. Choose 1 for sequential downloads.</string>
+    <string-array name="season_download_batch_sizes">
+        <item>1</item><item>2</item><item>3</item><item>4</item><item>5</item>
+    </string-array>
+</resources>

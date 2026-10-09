@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="download_season">Download season</string>
+    <string name="season_download_waiting">Waiting to start season downloads…</string>
+    <string name="season_download_adding">Season queue: %1$d of %2$d episodes processed. The next batch waits for the current batch to finish.</string>
+    <string name="season_download_summary">Queued: %1$d · Skipped: %2$d · Could not queue: %3$d. See Downloads for progress.</string>
+    <string name="season_download_error">Could not finish adding episodes. Tap Download season to retry; existing downloads will be skipped.</string>
+</resources>

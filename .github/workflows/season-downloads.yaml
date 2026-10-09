@@ -1,0 +1,51 @@
+name: Season downloads checks and Pixel APK
+
+on:
+  push:
+    branches: [feature/season-downloads]
+  pull_request:
+    branches: [pixel7-android17-downloads]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '17'
+          distribution: temurin
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Check formatting, queue behavior and phone compilation
+        run: ./gradlew ktfmtCheck :core:testLibreDebugUnitTest :app:phone:compileLibreDebugKotlin
+      - name: Save test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: season-download-test-reports
+          path: core/build/reports/tests/testLibreDebugUnitTest/
+
+  pixel-apk:
+    needs: validate
+    # The push run builds the installable APK; PR runs repeat the validation only.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '17'
+          distribution: temurin
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Build phone APKs after validation
+        run: ./gradlew :app:phone:assembleLibreDebug
+      - name: Upload Pixel ARM64 APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: phone-season-downloads-arm64-debug.apk
+          if-no-files-found: error
+          path: app/phone/build/outputs/apk/libre/debug/phone-libre-arm64-v8a-debug.apk
